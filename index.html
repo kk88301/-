@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>代購固定成本計算機 (含照片修正版)</title>
+    <title>代購全功能計算機 (前台自助新增版)</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -23,44 +23,61 @@
             max-width: 450px;
             box-sizing: border-box;
         }
-        h2 {
+        h2, h3 {
             text-align: center;
             color: #2c3e50;
             margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 1.4em;
+        }
+        h2 { font-size: 1.4em; margin-bottom: 20px; }
+        h3 { font-size: 1.1em; color: #e65100; margin-bottom: 15px; text-align: left; border-left: 4px solid #e65100; padding-left: 8px;}
+        
+        .admin-box {
+            background-color: #fff3e0;
+            border: 1px solid #ffe0b2;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
         }
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: bold;
-            font-size: 0.95em;
+            font-size: 0.9em;
             color: #495057;
         }
         select, input {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #ced4da;
             border-radius: 8px;
             box-sizing: border-box;
-            font-size: 1em;
+            font-size: 0.95em;
             background-color: #fff;
-            -webkit-appearance: none;
         }
-        .btn-add {
+        .btn {
             width: 100%;
-            background-color: #228be6;
             color: white;
             border: none;
             padding: 12px;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: 0.95em;
             font-weight: bold;
             cursor: pointer;
             margin-top: 5px;
+        }
+        .btn-orange { background-color: #f57c00; }
+        .btn-blue { background-color: #228be6; }
+        .btn-delete {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            cursor: pointer;
         }
         .list-title {
             font-weight: bold;
@@ -71,8 +88,6 @@
             border-bottom: 2px solid #dee2e6;
             padding-bottom: 5px;
         }
-        
-        /* 清單卡片式排版 (含照片) */
         .cart-item {
             display: flex;
             align-items: center;
@@ -91,28 +106,9 @@
             margin-right: 12px;
             background-color: #e9ecef;
         }
-        .item-details {
-            flex-grow: 1;
-        }
-        .item-name {
-            font-weight: bold;
-            font-size: 1.05em;
-            margin-bottom: 4px;
-        }
-        .item-price-qty {
-            color: #666;
-            font-size: 0.9em;
-        }
-        .btn-delete {
-            background-color: #ff6b6b;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8em;
-            cursor: pointer;
-            margin-left: 8px;
-        }
+        .item-details { flex-grow: 1; }
+        .item-name { font-weight: bold; font-size: 1.05em; margin-bottom: 4px; }
+        .item-price-qty { color: #666; font-size: 0.9em; }
         
         .result-box {
             background-color: #e8f5e9;
@@ -124,31 +120,39 @@
             justify-content: space-between;
             align-items: center;
         }
-        .result-title {
-            font-weight: bold;
-            color: #2e7d32;
-            font-size: 1.1em;
-        }
-        .result-price {
-            font-weight: bold;
-            color: #1b5e20;
-            font-size: 1.4em;
-        }
+        .result-title { font-weight: bold; color: #2e7d32; font-size: 1.1em; }
+        .result-price { font-weight: bold; color: #1b5e20; font-size: 1.4em; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🛒 買手成本計算機 (含照片)</h2>
+    
+    <div class="admin-box">
+        <h3>➕ 上架新商品 (免改代碼)</h3>
+        <div class="form-group">
+            <label>商品名稱</label>
+            <input type="text" id="newProdName" placeholder="例如：經典護手霜">
+        </div>
+        <div class="form-group">
+            <label>固定台幣成本 (元)</label>
+            <input type="number" id="newProdPrice" placeholder="例如：160">
+        </div>
+        <div class="form-group">
+            <label>商品照片 (點擊拍照或選相簿)</label>
+            <input type="file" id="newProdImage" accept="image/*" style="padding:5px;">
+        </div>
+        <button class="btn btn-orange" onclick="addNewProductToMenu()">將此商品上架到選單</button>
+    </div>
+
+    <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
+
+    <h2>🛒 買手成本計算機</h2>
     
     <div class="form-group">
-        <label for="productSelect">選擇商品</label>
+        <label for="productSelect">選擇已上架商品</label>
         <select id="productSelect">
-            <option value="330" data-image="moisturizer.jpg">Trader Joe's 保濕凝膠 (NT$ 330)</option>
-            <option value="160" data-image="IMG_4452.jpeg">Trader Joe's 經典護手霜 (NT$ 160)</option>
-            <option value="250" data-image="spray.jpg">Trader Joe's 噴霧 (NT$ 250)</option>
-            <option value="120" data-image="chocolate.jpg">Trader Joe's 巧克力 (NT$ 120)</option>
-        </select>
+            </select>
     </div>
 
     <div class="form-group">
@@ -156,11 +160,10 @@
         <input type="number" id="productQty" value="1" min="1">
     </div>
 
-    <button class="btn-add" onclick="addItem()">加入計算清單</button>
+    <button class="btn btn-blue" onclick="addItemToCart()">加入計算清單</button>
 
     <div class="list-title">📋 本次採購明細</div>
-    <div id="cartList">
-        </div>
+    <div id="cartList"></div>
 
     <div class="result-box">
         <span class="result-title">應付買手總額：</span>
@@ -169,24 +172,87 @@
 </div>
 
 <script>
+    // 預設的初始商品清單（如果記憶體是空的，會顯示這兩個作為範例）
+    const defaultProducts = [
+        { name: "Trader Joe's 保濕凝膠", price: 330, image: "" },
+        { name: "Trader Joe's 經典護手霜", price: 160, image: "" }
+    ];
+
+    let products = JSON.parse(localStorage.getItem('tj_products')) || defaultProducts;
     let cart = [];
 
-    function addItem() {
+    // 1. 初始化：把商品清單渲染到下拉選單中
+    function updateSelectMenu() {
+        const select = document.getElementById('productSelect');
+        select.innerHTML = '';
+        products.forEach((prod, index) => {
+            const option = document.createElement('option');
+            option.value = index; // 用陣列的編號當 value
+            option.innerText = `${prod.name} (NT$ ${prod.price})`;
+            select.appendChild(option);
+        });
+    }
+
+    // 2. 前台新增商品邏輯（包含把圖片轉成可儲存的格式）
+    function addNewProductToMenu() {
+        const nameInput = document.getElementById('newProdName');
+        const priceInput = document.getElementById('newProdPrice');
+        const imageInput = document.getElementById('newProdImage');
+
+        const name = nameInput.value.trim();
+        const price = parseInt(priceInput.value);
+
+        if (!name || !price) {
+            alert('請填寫商品名稱和價格喔！');
+            return;
+        }
+
+        const file = imageInput.files[0];
+        
+        // 如果有上傳照片，需要把照片轉成 Base64 文字字串，才能存進手機記憶體
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Image = e.target.result;
+                saveProduct(name, price, base64Image);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            saveProduct(name, price, ""); // 沒照片就傳空字串
+        }
+    }
+
+    function saveProduct(name, price, imageSrc) {
+        // 新增到商品陣列
+        products.push({ name: name, price: price, image: imageSrc });
+        // 儲存到手機瀏覽器記憶體 (LocalStorage)
+        localStorage.setItem('tj_products', JSON.stringify(products));
+        
+        // 清空輸入框
+        document.getElementById('newProdName').value = '';
+        document.getElementById('newProdPrice').value = '';
+        document.getElementById('newProdImage').value = '';
+
+        alert('🎉 商品上架成功！已加入下方選單');
+        updateSelectMenu(); // 更新下拉選單
+    }
+
+    // 3. 加入計算購物車
+    function addItemToCart() {
         const select = document.getElementById('productSelect');
         const qtyInput = document.getElementById('productQty');
         
-        const productName = select.options[select.selectedIndex].text.split(' (')[0];
-        const productPrice = parseInt(select.value);
-        const qty = parseInt(qtyInput.value) || 1;
+        if (select.value === '') return;
         
-        // 🌟【修正處】精準抓取選單上設定的 data-image 屬性
-        const productImage = select.options[select.selectedIndex].getAttribute('data-image') || '';
+        const selectedIndex = select.value;
+        const prod = products[selectedIndex];
+        const qty = parseInt(qtyInput.value) || 1;
 
         cart.push({
-            name: productName,
-            price: productPrice,
+            name: prod.name,
+            price: prod.price,
             qty: qty,
-            image: productImage 
+            image: prod.image
         });
 
         qtyInput.value = 1;
@@ -198,6 +264,7 @@
         updateUI();
     }
 
+    // 4. 更新下方的計算明細畫面
     function updateUI() {
         const cartList = document.getElementById('cartList');
         const totalTWD = document.getElementById('totalTWD');
@@ -216,7 +283,7 @@
             const div = document.createElement('div');
             div.className = 'cart-item';
             
-            // 🌟 如果有照片檔名，就讀取照片；如果沒設定，就顯示空白灰色框
+            // 如果有照片就顯示，沒照片就顯示灰色預設圖
             const imgSrc = item.image ? item.image : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70"><rect width="70" height="70" fill="%23e9ecef"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="12" fill="%23adb5bd">無照片</text></svg>';
 
             div.innerHTML = `
@@ -236,6 +303,8 @@
         totalTWD.innerText = total.toLocaleString();
     }
 
+    // 網頁打開時自動載入選單
+    updateSelectMenu();
     updateUI();
 </script>
 

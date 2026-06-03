@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trader Joe's 買手專用計算機 (Creamy Minimalist)</title>
+    <title>Trader Joe's 買手專用計算機 (含帳單功能)</title>
     <style>
         :root {
-            --bg-color: #f7f5f0; /* 療癒的韓系燕麥暖白底色 */
-            --card-bg: #ffffff; /* 純白乾淨卡片 */
-            --text-main: #4a4238; /* 溫柔的深摩卡棕文字（比純黑更柔和） */
-            --text-muted: #9c9284; /* 淺駝色低調文字 */
-            --accent-color: #c4a482; /* 氣質奶茶色（主要按鈕與重點色） */
-            --border-color: #ebe6dd; /* 淡淡的奶油線條 */
-            --input-bg: #faf9f6; /* 輸入框微米色 */
+            --bg-color: #f7f5f0; /* 韓系燕麥暖白 */
+            --card-bg: #ffffff;
+            --text-main: #4a4238; /* 深摩卡棕 */
+            --text-muted: #9c9284;
+            --accent-color: #c4a482; /* 氣質奶茶色 */
+            --border-color: #ebe6dd;
+            --input-bg: #faf9f6;
         }
 
         body {
@@ -28,8 +28,8 @@
         .container {
             background-color: var(--card-bg);
             padding: 28px 20px;
-            border-radius: 24px; /* 韓國 App 很喜歡的大圓角 */
-            box-shadow: 0 10px 30px rgba(74, 66, 56, 0.04); /* 非常輕柔的陰影 */
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(74, 66, 56, 0.04);
             width: 100%;
             max-width: 440px;
             box-sizing: border-box;
@@ -76,7 +76,7 @@
             color: var(--text-muted);
         }
 
-        select, input {
+        select, input, textarea {
             width: 100%;
             padding: 12px 14px;
             border: 1px solid var(--border-color);
@@ -97,10 +97,9 @@
             padding-right: 36px;
         }
 
-        select:focus, input:focus {
+        select:focus, input:focus, textarea:focus {
             border-color: var(--accent-color);
             outline: none;
-            background-color: #fff;
         }
 
         input[type="file"] {
@@ -121,6 +120,7 @@
             cursor: pointer;
             transition: all 0.2s;
             letter-spacing: 0.5px;
+            margin-bottom: 10px;
         }
 
         .btn:active {
@@ -128,9 +128,10 @@
             opacity: 0.9;
         }
 
-        /* 韓系低飽和度奶茶色與米灰色按鈕 */
         .btn-orange { background-color: #e8ded1; color: var(--text-main); border: 1px solid #dfd3c3; }
         .btn-blue { background-color: var(--accent-color); color: #ffffff; box-shadow: 0 4px 12px rgba(196, 164, 130, 0.2); }
+        /* 綠色調的精緻發票按鈕 */
+        .btn-green { background-color: #a3b19b; color: #ffffff; box-shadow: 0 4px 12px rgba(163, 177, 155, 0.2); }
 
         .btn-delete {
             background-color: #fcfaf7;
@@ -142,7 +143,6 @@
             font-weight: 500;
             cursor: pointer;
         }
-        .btn-delete:active { background-color: #f5eded; }
 
         .list-title {
             font-weight: 600;
@@ -158,7 +158,7 @@
             border-radius: 12px;
             padding: 4px 12px;
             margin-top: 12px;
-            max-height: 180px;
+            max-height: 150px;
             overflow-y: auto;
         }
         .admin-menu-item {
@@ -181,7 +181,6 @@
             touch-action: none;
         }
 
-        /* 🛒 購物車卡片 - 乾淨韓系風 */
         .cart-item {
             display: flex;
             align-items: center;
@@ -190,7 +189,6 @@
             padding: 14px;
             border-radius: 16px;
             margin-bottom: 12px;
-            box-shadow: 0 2px 8px rgba(74, 66, 56, 0.01);
         }
         .item-photo {
             width: 68px;
@@ -206,7 +204,6 @@
         .item-price-qty { color: var(--text-muted); font-size: 0.88em; margin-bottom: 4px; }
         .item-date { color: #b5ada1; font-size: 0.75em; }
         
-        /* 📊 總計區塊 - 溫柔的淡奶茶底色 */
         .result-box {
             background-color: #f5eedf;
             border: 1px solid #ebdcc5;
@@ -216,16 +213,34 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
         }
         .result-title { font-weight: 600; color: var(--text-main); font-size: 0.95em; }
         .result-price { font-weight: 700; color: #8f6d45; font-size: 1.4em; }
+
+        /* 📋 帳單預覽區塊 */
+        .receipt-box {
+            background-color: #faf9f6;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px;
+            margin-top: 20px;
+            display: none; /* 預設先隱藏 */
+        }
+        textarea {
+            background-color: #fff;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #5a5248;
+            resize: none;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     
-    <!-- 🛠️ 區塊一：管理區 -->
     <div class="admin-box">
         <h3>✨ 商品上架管理</h3>
         <div class="form-group">
@@ -248,7 +263,6 @@
 
     <h2 style="border-top: 1px solid var(--border-color); padding-top: 28px; letter-spacing: 1px;">🛒 買手採購計算</h2>
     
-    <!-- 區塊二：計算區 -->
     <div class="form-group">
         <label for="productSelect">選擇已上架商品</label>
         <select id="productSelect"></select>
@@ -272,6 +286,14 @@
     <div class="result-box">
         <span class="result-title">應付買手總額</span>
         <span class="result-price">NT$ <span id="totalTWD">0</span></span>
+    </div>
+
+    <button class="btn btn-green" onclick="generateReceipt()">🧾 生成採購帳單</button>
+
+    <div class="receipt-box" id="receiptBox">
+        <label style="color:#788871; font-weight:bold; margin-bottom:8px; display:block;">📋 帳單文字 (已自動複製)：</label>
+        <textarea id="receiptText" rows="10" readonly></textarea>
+        <button class="btn btn-orange" style="margin-top:10px; margin-bottom:0;" onclick="copyReceiptText()">再次複製帳單文字</button>
     </div>
 </div>
 
@@ -487,6 +509,7 @@
 
         if (cart.length === 0) {
             cartList.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:16px; font-size:0.9em; border: 1px dashed var(--border-color); border-radius:16px;">明細空空如也，請從上方選擇加入</div>';
+            document.getElementById('receiptBox').style.display = 'none'; // 購物車空了就隱藏帳單
         }
 
         cart.forEach((item, index) => {
@@ -514,6 +537,53 @@
         });
 
         totalTWD.innerText = total.toLocaleString();
+    }
+
+    // 🌟【全新核心邏輯】生成純文字帳單並自動複製
+    function generateReceipt() {
+        if (cart.length === 0) {
+            alert('採購明細裡沒有商品，無法生成帳單喔！');
+            return;
+        }
+
+        let total = 0;
+        let text = `=========================\n`;
+        text += `   🛒 Trader Joe's 採購帳單   \n`;
+        text += `=========================\n\n`;
+
+        cart.forEach((item, index) => {
+            const itemTotal = item.price * item.qty;
+            total += itemTotal;
+            text += `${index + 1}. ${item.name}\n`;
+            text += `   單價: NT$ ${item.price} / 數量: ${item.qty}\n`;
+            text += `   日期: ${item.date} ➡️ 小計: NT$ ${itemTotal}\n\n`;
+        });
+
+        text += `-------------------------\n`;
+        text += `💰 應付買手總金額: NT$ ${total.toLocaleString()} 元\n`;
+        text += `=========================`;
+
+        // 顯示帳單區塊並塞入文字
+        const receiptBox = document.getElementById('receiptBox');
+        const receiptText = document.getElementById('receiptText');
+        receiptText.value = text;
+        receiptBox.style.display = 'block';
+
+        // 自動複製到剪貼簿
+        copyReceiptText(true);
+    }
+
+    // 複製文字功能
+    function copyReceiptText(isAuto = false) {
+        const receiptText = document.getElementById('receiptText');
+        receiptText.select();
+        receiptText.setSelectionRange(0, 99999); // 針對手機優化
+
+        navigator.clipboard.writeText(receiptText.value).then(() => {
+            if (!isAuto) alert('📋 帳單文字已成功複製！可以直接去 LINE 貼上給賣家囉。');
+        }).catch(err => {
+            alert('手機不支援自動複製，請手動全選複製框框內的文字喔！');
+        });
     }
 
     setTodayDate();

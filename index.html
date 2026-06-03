@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trader Joe's 買手專用計算機 (含帳單功能)</title>
+    <title>多賣場代購採購計算機</title>
     <style>
         :root {
-            --bg-color: #f7f5f0; /* 韓系燕麥暖白 */
+            --bg-color: #f7f5f0;
             --card-bg: #ffffff;
-            --text-main: #4a4238; /* 深摩卡棕 */
+            --text-main: #4a4238;
             --text-muted: #9c9284;
-            --accent-color: #c4a482; /* 氣質奶茶色 */
+            --accent-color: #c4a482;
             --border-color: #ebe6dd;
             --input-bg: #faf9f6;
         }
@@ -130,7 +130,6 @@
 
         .btn-orange { background-color: #e8ded1; color: var(--text-main); border: 1px solid #dfd3c3; }
         .btn-blue { background-color: var(--accent-color); color: #ffffff; box-shadow: 0 4px 12px rgba(196, 164, 130, 0.2); }
-        /* 綠色調的精緻發票按鈕 */
         .btn-green { background-color: #a3b19b; color: #ffffff; box-shadow: 0 4px 12px rgba(163, 177, 155, 0.2); }
 
         .btn-delete {
@@ -181,6 +180,18 @@
             touch-action: none;
         }
 
+        /* 店家標籤小貼紙樣式 */
+        .shop-tag {
+            display: inline-block;
+            font-size: 0.75em;
+            padding: 2px 6px;
+            border-radius: 6px;
+            background-color: #f0e6db;
+            color: #7c6d5c;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
         .cart-item {
             display: flex;
             align-items: center;
@@ -200,7 +211,7 @@
             border: 1px solid var(--border-color);
         }
         .item-details { flex-grow: 1; }
-        .item-name { font-weight: 600; font-size: 0.95em; color: var(--text-main); margin-bottom: 4px; }
+        .item-name { font-weight: 600; font-size: 0.95em; color: var(--text-main); margin-bottom: 2px; }
         .item-price-qty { color: var(--text-muted); font-size: 0.88em; margin-bottom: 4px; }
         .item-date { color: #b5ada1; font-size: 0.75em; }
         
@@ -218,22 +229,13 @@
         .result-title { font-weight: 600; color: var(--text-main); font-size: 0.95em; }
         .result-price { font-weight: 700; color: #8f6d45; font-size: 1.4em; }
 
-        /* 📋 帳單預覽區塊 */
         .receipt-box {
             background-color: #faf9f6;
             border: 1px solid var(--border-color);
             border-radius: 16px;
             padding: 16px;
             margin-top: 20px;
-            display: none; /* 預設先隱藏 */
-        }
-        textarea {
-            background-color: #fff;
-            font-family: monospace;
-            font-size: 0.9em;
-            color: #5a5248;
-            resize: none;
-            line-height: 1.5;
+            display: none;
         }
     </style>
 </head>
@@ -241,15 +243,28 @@
 
 <div class="container">
     
+    <!-- 🛠️ 區塊一：管理區 -->
     <div class="admin-box">
         <h3>✨ 商品上架管理</h3>
+        
+        <!-- 🌟【全新功能】選擇採購來源賣場 -->
+        <div class="form-group">
+            <label>採購賣場</label>
+            <select id="newProdShop">
+                <option value="Trader Joe's">Trader Joe's</option>
+                <option value="Costco">Costco</option>
+                <option value="Target">Target</option>
+                <option value="其他賣場">其他賣場</option>
+            </select>
+        </div>
+
         <div class="form-group">
             <label>商品名稱</label>
-            <input type="text" id="newProdName" placeholder="例如：保濕凝膠">
+            <input type="text" id="newProdName" placeholder="例如：經典護手霜 / 科克蘭鮮乳">
         </div>
         <div class="form-group">
             <label>固定成本 (台幣 NT$)</label>
-            <input type="number" id="newProdPrice" placeholder="例如：330">
+            <input type="number" id="newProdPrice" placeholder="例如：160">
         </div>
         <div class="form-group">
             <label>商品照片</label>
@@ -263,6 +278,7 @@
 
     <h2 style="border-top: 1px solid var(--border-color); padding-top: 28px; letter-spacing: 1px;">🛒 買手採購計算</h2>
     
+    <!-- 區塊二：計算區 -->
     <div class="form-group">
         <label for="productSelect">選擇已上架商品</label>
         <select id="productSelect"></select>
@@ -292,15 +308,18 @@
 
     <div class="receipt-box" id="receiptBox">
         <label style="color:#788871; font-weight:bold; margin-bottom:8px; display:block;">📋 帳單文字 (已自動複製)：</label>
-        <textarea id="receiptText" rows="10" readonly></textarea>
+        <textarea id="receiptText" rows="12" readonly></textarea>
         <button class="btn btn-orange" style="margin-top:10px; margin-bottom:0;" onclick="copyReceiptText()">再次複製帳單文字</button>
     </div>
 </div>
 
 <script>
+    // 預設初始商品，幫你把三個賣場的範例都先建好
     const defaultProducts = [
-        { name: "Trader Joe's 保濕凝膠", price: 330, image: "" },
-        { name: "Trader Joe's 經典護手霜", price: 160, image: "" }
+        { name: "保濕凝膠", price: 330, shop: "Trader Joe's", image: "" },
+        { name: "經典護手霜", price: 160, shop: "Trader Joe's", image: "" },
+        { name: "科克蘭鮮乳", price: 280, shop: "Costco", image: "" },
+        { name: "網美保溫杯", price: 890, shop: "Target", image: "" }
     ];
 
     let products = JSON.parse(localStorage.getItem('tj_products')) || defaultProducts;
@@ -329,7 +348,8 @@
         products.forEach((prod, index) => {
             const option = document.createElement('option');
             option.value = index;
-            option.innerText = `${prod.name} (NT$ ${prod.price})`;
+            // 下拉選單顯示時前方加上賣場名稱，方便選取
+            option.innerText = `[${prod.shop || "未分類"}] ${prod.name} (NT$ ${prod.price})`;
             select.appendChild(option);
 
             const div = document.createElement('div');
@@ -339,7 +359,7 @@
             div.innerHTML = `
                 <div style="display:flex; align-items:center;">
                     <span class="drag-handle">☰</span>
-                    <span style="font-weight:500;">${prod.name} <span style="color:var(--accent-color); font-size:0.9em; margin-left:4px;">$${prod.price}</span></span>
+                    <span style="font-weight:500;">[${prod.shop || "未分類"}] ${prod.name} <span style="color:var(--accent-color); font-size:0.9em; margin-left:4px;">$${prod.price}</span></span>
                 </div>
                 <button class="btn-delete" onclick="removeProductFromMenu(${index})">下架</button>
             `;
@@ -361,7 +381,6 @@
             });
 
             const handle = item.querySelector('.drag-handle');
-            
             handle.addEventListener('touchstart', (e) => {
                 item.classList.add('dragging');
                 item.style.position = 'relative';
@@ -400,7 +419,6 @@
 
     function getDragAfterElement(list, y) {
         const draggableElements = [...list.querySelectorAll('.admin-menu-item:not(.dragging)')];
-
         return draggableElements.reduce((closest, child) => {
             const box = child.getBoundingClientRect();
             const offset = y - box.top - box.height / 2;
@@ -415,12 +433,10 @@
     function saveNewOrder() {
         const listItems = [...document.getElementById('adminMenuList').querySelectorAll('.admin-menu-item')];
         const newProductsOrder = [];
-
         listItems.forEach(item => {
             const oldIndex = parseInt(item.getAttribute('data-index'));
             newProductsOrder.push(products[oldIndex]);
         });
-
         products = newProductsOrder;
         localStorage.setItem('tj_products', JSON.stringify(products));
         updateSelectMenu();
@@ -435,10 +451,12 @@
     }
 
     function addNewProductToMenu() {
+        const shopSelect = document.getElementById('newProdShop');
         const nameInput = document.getElementById('newProdName');
         const priceInput = document.getElementById('newProdPrice');
         const imageInput = document.getElementById('newProdImage');
 
+        const shop = shopSelect.value;
         const name = nameInput.value.trim();
         const price = parseInt(priceInput.value);
 
@@ -451,23 +469,23 @@
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                saveProduct(name, price, e.target.result);
+                saveProduct(name, price, shop, e.target.result);
             };
             reader.readAsDataURL(file);
         } else {
-            saveProduct(name, price, "");
+            saveProduct(name, price, shop, "");
         }
     }
 
-    function saveProduct(name, price, imageSrc) {
-        products.unshift({ name: name, price: price, image: imageSrc });
+    function saveProduct(name, price, shop, imageSrc) {
+        products.unshift({ name: name, price: price, shop: shop, image: imageSrc });
         localStorage.setItem('tj_products', JSON.stringify(products));
         
         document.getElementById('newProdName').value = '';
         document.getElementById('newProdPrice').value = '';
         document.getElementById('newProdImage').value = '';
 
-        alert('🎉 商品上架成功！');
+        alert(`🎉 [${shop}] 商品上架成功！`);
         updateSelectMenu();
     }
 
@@ -486,6 +504,7 @@
         cart.push({
             name: prod.name,
             price: prod.price,
+            shop: prod.shop || "未分類",
             qty: qty,
             image: prod.image,
             date: date
@@ -509,7 +528,7 @@
 
         if (cart.length === 0) {
             cartList.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:16px; font-size:0.9em; border: 1px dashed var(--border-color); border-radius:16px;">明細空空如也，請從上方選擇加入</div>';
-            document.getElementById('receiptBox').style.display = 'none'; // 購物車空了就隱藏帳單
+            document.getElementById('receiptBox').style.display = 'none';
         }
 
         cart.forEach((item, index) => {
@@ -524,11 +543,13 @@
             div.innerHTML = `
                 <img src="${imgSrc}" alt="${item.name}" class="item-photo">
                 <div class="item-details">
+                    <!-- 📍 顯示賣場標籤貼紙 -->
+                    <span class="shop-tag">📍 ${item.shop}</span>
                     <div class="item-name">${item.name}</div>
                     <div class="item-price-qty">NT$ ${item.price} × ${item.qty}</div>
                     <div class="item-date">📅 ${item.date}</div>
                 </div>
-                <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; height: 64px;">
+                <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; height: 75px;">
                     <div style="font-weight:600; font-size:1.05em; color:var(--text-main);">$${itemTotal}</div>
                     <button class="btn-delete" onclick="deleteItem(${index})" style="padding: 4px 8px; font-size: 0.75em;">刪除</button>
                 </div>
@@ -539,50 +560,64 @@
         totalTWD.innerText = total.toLocaleString();
     }
 
-    // 🌟【全新核心邏輯】生成純文字帳單並自動複製
+    // 🌟【全新核心邏輯】帳單會自動按「賣場」分門別類排好
     function generateReceipt() {
         if (cart.length === 0) {
             alert('採購明細裡沒有商品，無法生成帳單喔！');
             return;
         }
 
-        let total = 0;
-        let text = `=========================\n`;
-        text += `   🛒 Trader Joe's 採購帳單   \n`;
-        text += `=========================\n\n`;
-
-        cart.forEach((item, index) => {
-            const itemTotal = item.price * item.qty;
-            total += itemTotal;
-            text += `${index + 1}. ${item.name}\n`;
-            text += `   單價: NT$ ${item.price} / 數量: ${item.qty}\n`;
-            text += `   日期: ${item.date} ➡️ 小計: NT$ ${itemTotal}\n\n`;
+        // 先把購物車資料按賣場分組
+        const groupedCart = {};
+        cart.forEach(item => {
+            if (!groupedCart[item.shop]) {
+                groupedCart[item.shop] = [];
+            }
+            groupedCart[item.shop].push(item);
         });
 
-        text += `-------------------------\n`;
-        text += `💰 應付買手總金額: NT$ ${total.toLocaleString()} 元\n`;
+        let totalSum = 0;
+        let text = `=========================\n`;
+        text += `   🛒 全賣場聯合採購帳單   \n`;
+        text += `=========================\n\n`;
+
+        // 依據不同賣場跑迴圈生成文字
+        for (const shopName in groupedCart) {
+            text += `📍 【賣場：${shopName}】\n`;
+            text += `-------------------------\n`;
+            
+            let shopSubtotal = 0;
+            groupedCart[shopName].forEach((item, idx) => {
+                const itemTotal = item.price * item.qty;
+                shopSubtotal += itemTotal;
+                totalSum += itemTotal;
+                text += ` ${idx + 1}. ${item.name} (x${item.qty})\n`;
+                text += `    單價: $${item.price} ➡️ 小計: NT$ ${itemTotal}\n`;
+            });
+            text += ` 🔸 該店小計: NT$ ${shopSubtotal.toLocaleString()} 元\n\n`;
+        }
+
+        text += `=========================\n`;
+        text += `💰 應付買手總金額: NT$ ${totalSum.toLocaleString()} 元\n`;
         text += `=========================`;
 
-        // 顯示帳單區塊並塞入文字
         const receiptBox = document.getElementById('receiptBox');
         const receiptText = document.getElementById('receiptText');
         receiptText.value = text;
         receiptBox.style.display = 'block';
 
-        // 自動複製到剪貼簿
         copyReceiptText(true);
     }
 
-    // 複製文字功能
     function copyReceiptText(isAuto = false) {
         const receiptText = document.getElementById('receiptText');
         receiptText.select();
-        receiptText.setSelectionRange(0, 99999); // 針對手機優化
+        receiptText.setSelectionRange(0, 99999);
 
         navigator.clipboard.writeText(receiptText.value).then(() => {
-            if (!isAuto) alert('📋 帳單文字已成功複製！可以直接去 LINE 貼上給賣家囉。');
+            if (!isAuto) alert('📋 帳單已分類並成功複製！快去 LINE 貼上吧。');
         }).catch(err => {
-            alert('手機不支援自動複製，請手動全選複製框框內的文字喔！');
+            alert('請手動全選複製框內的文字喔！');
         });
     }
 

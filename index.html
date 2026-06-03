@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>代購全功能計算機 (含日期與刪除品項功能)</title>
+    <title>代購全功能計算機 (最新商品最前版)</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -89,7 +89,6 @@
             padding-bottom: 5px;
         }
         
-        /* 管理選單列表樣式 */
         .admin-menu-list {
             background-color: #fff;
             border: 1px solid #ffe0b2;
@@ -218,7 +217,6 @@
         document.getElementById('purchaseDate').value = `${yyyy}-${mm}-${dd}`;
     }
 
-    // 🌟 更新下拉選單，同時更新管理員的「下架刪除清單」
     function updateSelectMenu() {
         const select = document.getElementById('productSelect');
         const adminMenuList = document.getElementById('adminMenuList');
@@ -232,13 +230,11 @@
         }
 
         products.forEach((prod, index) => {
-            // 更新計算機的下拉選單
             const option = document.createElement('option');
             option.value = index;
             option.innerText = `${prod.name} (NT$ ${prod.price})`;
             select.appendChild(option);
 
-            // 更新管理員區的刪除列表
             const div = document.createElement('div');
             div.className = 'admin-menu-item';
             div.innerHTML = `
@@ -249,16 +245,14 @@
         });
     }
 
-    // 🌟【全新功能】從選單中徹底刪除/下架商品
     function removeProductFromMenu(index) {
         if (confirm(`確定要把「${products[index].name}」從選單中刪除嗎？`)) {
-            products.splice(index, 1); // 從陣列中移除
-            localStorage.setItem('tj_products', JSON.stringify(products)); // 更新手機記憶體
-            updateSelectMenu(); // 刷新畫面
+            products.splice(index, 1);
+            localStorage.setItem('tj_products', JSON.stringify(products));
+            updateSelectMenu();
         }
     }
 
-    // 上架新商品
     function addNewProductToMenu() {
         const nameInput = document.getElementById('newProdName');
         const priceInput = document.getElementById('newProdPrice');
@@ -285,18 +279,18 @@
     }
 
     function saveProduct(name, price, imageSrc) {
-        products.push({ name: name, price: price, image: imageSrc });
+        // 🌟【關鍵修正】原本用 push 是加到最後面，改用 unshift 會直接「插隊」加到陣列的最前面！
+        products.unshift({ name: name, price: price, image: imageSrc });
         localStorage.setItem('tj_products', JSON.stringify(products));
         
         document.getElementById('newProdName').value = '';
         document.getElementById('newProdPrice').value = '';
         document.getElementById('newProdImage').value = '';
 
-        alert('🎉 商品上架成功！');
+        alert('🎉 商品上架成功！已幫您排在選單最上方。');
         updateSelectMenu();
     }
 
-    // 加入購物車
     function addItemToCart() {
         const select = document.getElementById('productSelect');
         const qtyInput = document.getElementById('productQty');

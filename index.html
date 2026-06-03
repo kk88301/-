@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>代購全功能計算機 (含日期功能版)</title>
+    <title>代購全功能計算機 (含日期與刪除品項功能)</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -88,6 +88,27 @@
             border-bottom: 2px solid #dee2e6;
             padding-bottom: 5px;
         }
+        
+        /* 管理選單列表樣式 */
+        .admin-menu-list {
+            background-color: #fff;
+            border: 1px solid #ffe0b2;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 15px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .admin-menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #ffe0b2;
+            font-size: 0.9em;
+        }
+        .admin-menu-item:last-child { border-bottom: none; }
+
         .cart-item {
             display: flex;
             align-items: center;
@@ -130,7 +151,7 @@
 <div class="container">
     
     <div class="admin-box">
-        <h3>➕ 上架新商品 (免改代碼)</h3>
+        <h3>➕ 上架新商品</h3>
         <div class="form-group">
             <label>商品名稱</label>
             <input type="text" id="newProdName" placeholder="例如：經典護手霜">
@@ -144,6 +165,9 @@
             <input type="file" id="newProdImage" accept="image/*" style="padding:5px;">
         </div>
         <button class="btn btn-orange" onclick="addNewProductToMenu()">將此商品上架到選單</button>
+
+        <label style="margin-top: 15px; color:#e65100;">❌ 下架不需要的商品：</label>
+        <div class="admin-menu-list" id="adminMenuList"></div>
     </div>
 
     <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
@@ -177,7 +201,7 @@
 </div>
 
 <script>
-    // 預設的初始商品清單
+    // 預設初始商品
     const defaultProducts = [
         { name: "Trader Joe's 保濕凝膠", price: 330, image: "" },
         { name: "Trader Joe's 經典護手霜", price: 160, image: "" }
@@ -186,7 +210,6 @@
     let products = JSON.parse(localStorage.getItem('tj_products')) || defaultProducts;
     let cart = [];
 
-    // 🌟 自動將日期的欄位預設為「今天」
     function setTodayDate() {
         const today = new Date();
         const yyyy = today.getFullYear();
@@ -195,19 +218,47 @@
         document.getElementById('purchaseDate').value = `${yyyy}-${mm}-${dd}`;
     }
 
-    // 初始化商品選單
+    // 🌟 更新下拉選單，同時更新管理員的「下架刪除清單」
     function updateSelectMenu() {
         const select = document.getElementById('productSelect');
+        const adminMenuList = document.getElementById('adminMenuList');
+        
         select.innerHTML = '';
+        adminMenuList.innerHTML = '';
+
+        if (products.length === 0) {
+            adminMenuList.innerHTML = '<div style="color:#999; font-size:0.85em; text-align:center;">暫無商品</div>';
+            return;
+        }
+
         products.forEach((prod, index) => {
+            // 更新計算機的下拉選單
             const option = document.createElement('option');
             option.value = index;
             option.innerText = `${prod.name} (NT$ ${prod.price})`;
             select.appendChild(option);
+
+            // 更新管理員區的刪除列表
+            const div = document.createElement('div');
+            div.className = 'admin-menu-item';
+            div.innerHTML = `
+                <span>${prod.name} ($${prod.price})</span>
+                <button class="btn-delete" onclick="removeProductFromMenu(${index})">下架</button>
+            `;
+            adminMenuList.appendChild(div);
         });
     }
 
-    // 新增商品
+    // 🌟【全新功能】從選單中徹底刪除/下架商品
+    function removeProductFromMenu(index) {
+        if (confirm(`確定要把「${products[index].name}」從選單中刪除嗎？`)) {
+            products.splice(index, 1); // 從陣列中移除
+            localStorage.setItem('tj_products', JSON.stringify(products)); // 更新手機記憶體
+            updateSelectMenu(); // 刷新畫面
+        }
+    }
+
+    // 上架新商品
     function addNewProductToMenu() {
         const nameInput = document.getElementById('newProdName');
         const priceInput = document.getElementById('newProdPrice');
@@ -241,29 +292,29 @@
         document.getElementById('newProdPrice').value = '';
         document.getElementById('newProdImage').value = '';
 
-        alert('🎉 商品上架成功！已加入下方選單');
+        alert('🎉 商品上架成功！');
         updateSelectMenu();
     }
 
-    // 加入計算購物車 (含日期)
+    // 加入購物車
     function addItemToCart() {
         const select = document.getElementById('productSelect');
         const qtyInput = document.getElementById('productQty');
-        const dateInput = document.getElementById('purchaseDate'); // 抓取日期欄位
+        const dateInput = document.getElementById('purchaseDate');
         
-        if (select.value === '') return;
+        if (select.value === '' || !products[select.value]) return;
         
         const selectedIndex = select.value;
         const prod = products[selectedIndex];
         const qty = parseInt(qtyInput.value) || 1;
-        const date = dateInput.value; // 獲取選定的日期
+        const date = dateInput.value;
 
         cart.push({
             name: prod.name,
             price: prod.price,
             qty: qty,
             image: prod.image,
-            date: date // 存入購買日期
+            date: date
         });
 
         qtyInput.value = 1;
@@ -275,7 +326,6 @@
         updateUI();
     }
 
-    // 更新明細畫面
     function updateUI() {
         const cartList = document.getElementById('cartList');
         const totalTWD = document.getElementById('totalTWD');
@@ -296,7 +346,6 @@
             
             const imgSrc = item.image ? item.image : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70"><rect width="70" height="70" fill="%23e9ecef"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="12" fill="%23adb5bd">無照片</text></svg>';
 
-            // 🌟 在明細中加入日期顯示 (📅 購買日期：XXXX-XX-XX)
             div.innerHTML = `
                 <img src="${imgSrc}" alt="${item.name}" class="item-photo">
                 <div class="item-details">
@@ -315,7 +364,6 @@
         totalTWD.innerText = total.toLocaleString();
     }
 
-    // 網頁打開時自動載入
     setTodayDate();
     updateSelectMenu();
     updateUI();

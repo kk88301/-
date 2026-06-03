@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>代購全功能計算機 (最新商品最前版)</title>
+    <title>代購全功能計算機 (手指拖曳排序版)</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -89,24 +89,41 @@
             padding-bottom: 5px;
         }
         
+        /* 拖曳列表樣式 */
         .admin-menu-list {
             background-color: #fff;
             border: 1px solid #ffe0b2;
             border-radius: 8px;
-            padding: 10px;
+            padding: 5px 10px;
             margin-top: 15px;
-            max-height: 150px;
+            max-height: 250px;
             overflow-y: auto;
         }
         .admin-menu-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 0;
-            border-bottom: 1px solid #ffe0b2;
-            font-size: 0.9em;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f3f5;
+            font-size: 0.95em;
+            background-color: #fff;
         }
         .admin-menu-item:last-child { border-bottom: none; }
+        
+        /* 🌟 拖曳中項目的視覺效果 */
+        .admin-menu-item.dragging {
+            opacity: 0.5;
+            background-color: #f1f3f5;
+        }
+        
+        .drag-handle {
+            cursor: move;
+            color: #aaa;
+            padding-right: 10px;
+            font-size: 1.2em;
+            user-select: none;
+            touch-action: none; /* 防止手機拖曳時整個網頁跟著滾動 */
+        }
 
         .cart-item {
             display: flex;
@@ -165,7 +182,7 @@
         </div>
         <button class="btn btn-orange" onclick="addNewProductToMenu()">將此商品上架到選單</button>
 
-        <label style="margin-top: 15px; color:#e65100;">❌ 下架不需要的商品：</label>
+        <label style="margin-top: 15px; display:block; color:#e65100; font-weight:bold;">↕️ 拖曳 ☰ 調整順序 / ❌ 下架商品：</label>
         <div class="admin-menu-list" id="adminMenuList"></div>
     </div>
 
@@ -200,7 +217,6 @@
 </div>
 
 <script>
-    // 預設初始商品
     const defaultProducts = [
         { name: "Trader Joe's 保濕凝膠", price: 330, image: "" },
         { name: "Trader Joe's 經典護手霜", price: 160, image: "" }
@@ -217,6 +233,7 @@
         document.getElementById('purchaseDate').value = `${yyyy}-${mm}-${dd}`;
     }
 
+    // 渲染下拉選單與管理列表
     function updateSelectMenu() {
         const select = document.getElementById('productSelect');
         const adminMenuList = document.getElementById('adminMenuList');
@@ -225,26 +242,122 @@
         adminMenuList.innerHTML = '';
 
         if (products.length === 0) {
-            adminMenuList.innerHTML = '<div style="color:#999; font-size:0.85em; text-align:center;">暫無商品</div>';
+            adminMenuList.innerHTML = '<div style="color:#999; font-size:0.85em; text-align:center; padding:10px;">暫無商品</div>';
             return;
         }
 
         products.forEach((prod, index) => {
+            // 1. 更新下拉選單
             const option = document.createElement('option');
             option.value = index;
             option.innerText = `${prod.name} (NT$ ${prod.price})`;
             select.appendChild(option);
 
+            // 2. 更新管理列表 (帶有拖曳手把 ☰)
             const div = document.createElement('div');
             div.className = 'admin-menu-item';
+            div.setAttribute('draggable', 'true'); // 啟用網頁原生拖曳
+            div.setAttribute('data-index', index);
             div.innerHTML = `
-                <span>${prod.name} ($${prod.price})</span>
+                <div style="display:flex; align-items:center;">
+                    <span class="drag-handle">☰</span>
+                    <span>${prod.name} ($${prod.price})</span>
+                </div>
                 <button class="btn-delete" onclick="removeProductFromMenu(${index})">下架</button>
             `;
             adminMenuList.appendChild(div);
         });
+
+        // 🌟 初始化手機與電腦的拖曳事件監聽
+        initDragAndDrop();
     }
 
+    // 🌟【全新核心邏輯】處理手指與滑鼠的拖曳排序
+    function initDragAndDrop() {
+        const list = document.getElementById('adminMenuList');
+        const items = list.querySelectorAll('.admin-menu-item');
+
+        items.forEach(item => {
+            // --- 電腦版滑鼠拖曳 ---
+            item.addEventListener('dragstart', () => item.classList.add('dragging'));
+            item.addEventListener('dragend', () => {
+                item.classList.remove('dragging');
+                saveNewOrder();
+            });
+
+            // --- 手機版手指觸控拖曳 (Touch Events) ---
+            const handle = item.querySelector('.drag-handle');
+            
+            handle.addEventListener('touchstart', (e) => {
+                item.classList.add('dragging');
+                item.style.position = 'relative';
+            }, { passive: true });
+
+            handle.addEventListener('touchmove', (e) => {
+                e.preventDefault(); // 阻止手機網頁上下畫面跟著滾動
+                const touch = e.touches[0];
+                const afterElement = getDragAfterElement(list, touch.clientY);
+                if (afterElement == null) {
+                    list.appendChild(item);
+                } else {
+                    list.insertBefore(item, afterElement);
+                }
+            }, { passive: false });
+
+            handle.addEventListener('touchend', () => {
+                item.classList.remove('dragging');
+                saveNewOrder();
+            });
+        });
+
+        // 電腦版在區塊內拖曳移動中
+        list.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const afterElement = getDragAfterElement(list, e.clientY);
+            const draggingItem = document.querySelector('.dragging');
+            if (draggingItem) {
+                if (afterElement == null) {
+                    list.appendChild(draggingItem);
+                } else {
+                    list.insertBefore(draggingItem, afterElement);
+                }
+            }
+        });
+    }
+
+    // 計算目前拖曳到哪一個商品的上方或下方
+    function getDragAfterElement(list, y) {
+        const draggableElements = [...list.querySelectorAll('.admin-menu-item:not(.dragging)')];
+
+        return draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offset = y - box.top - box.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+            } else {
+                return closest;
+            }
+        }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    // 🌟 重新排列陣列順序並儲存
+    function saveNewOrder() {
+        const listItems = [...document.getElementById('adminMenuList').querySelectorAll('.admin-menu-item')];
+        const newProductsOrder = [];
+
+        listItems.forEach(item => {
+            const oldIndex = parseInt(item.getAttribute('data-index'));
+            newProductsOrder.push(products[oldIndex]);
+        });
+
+        products = newProductsOrder;
+        localStorage.setItem('tj_products', JSON.stringify(products)); // 寫入記憶體
+        
+        // 重新刷新下拉選單（這樣編號 index 才會被重新計算正確）
+        updateSelectMenu();
+    }
+
+    // 下架商品
     function removeProductFromMenu(index) {
         if (confirm(`確定要把「${products[index].name}」從選單中刪除嗎？`)) {
             products.splice(index, 1);
@@ -253,6 +366,7 @@
         }
     }
 
+    // 上架商品
     function addNewProductToMenu() {
         const nameInput = document.getElementById('newProdName');
         const priceInput = document.getElementById('newProdPrice');
@@ -279,7 +393,7 @@
     }
 
     function saveProduct(name, price, imageSrc) {
-        // 🌟【關鍵修正】原本用 push 是加到最後面，改用 unshift 會直接「插隊」加到陣列的最前面！
+        // 新增商品時，預設先加在選單最上面
         products.unshift({ name: name, price: price, image: imageSrc });
         localStorage.setItem('tj_products', JSON.stringify(products));
         
@@ -287,10 +401,11 @@
         document.getElementById('newProdPrice').value = '';
         document.getElementById('newProdImage').value = '';
 
-        alert('🎉 商品上架成功！已幫您排在選單最上方。');
+        alert('🎉 商品上架成功！已幫您排在最上方，您也可以在下方手動拖曳調整。');
         updateSelectMenu();
     }
 
+    // 加入明細清單
     function addItemToCart() {
         const select = document.getElementById('productSelect');
         const qtyInput = document.getElementById('productQty');

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>代購固定成本計算機</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            padding: 15px;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 450px;
+            box-sizing: border-box;
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 0.95em;
+            color: #495057;
+        }
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1em;
+            background-color: #fff;
+            -webkit-appearance: none; /* 讓iOS外觀一致 */
+        }
+        select:focus, input:focus {
+            border-color: #4dabf7;
+            outline: none;
+        }
+        .btn-add {
+            width: 100%;
+            background-color: #228be6;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        .btn-add:active {
+            background-color: #1c7ed6;
+        }
+        .list-title {
+            font-weight: bold;
+            margin-top: 25px;
+            margin-bottom: 10px;
+            color: #495057;
+            font-size: 1em;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 5px;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f3f5;
+            font-size: 0.95em;
+        }
+        .btn-delete {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            cursor: pointer;
+        }
+        .result-box {
+            background-color: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .result-title {
+            font-weight: bold;
+            color: #2e7d32;
+            font-size: 1.1em;
+        }
+        .result-price {
+            font-weight: bold;
+            color: #1b5e20;
+            font-size: 1.4em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🛒 買手成本計算機</h2>
+    
+    <div class="form-group">
+        <label for="productSelect">選擇商品</label>
+        <select id="productSelect">
+            <option value="330">Trader Joe's 保濕凝膠 (NT$ 330)</option>
+            <option value="160">Trader Joe's 經典護手霜 (NT$ 160)</option>
+            <option value="250">Trader Joe's 噴霧 (NT$ 250)</option>
+            <option value="120">Trader Joe's 巧克力 (NT$ 120)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="productQty">數量</label>
+        <input type="number" id="productQty" value="1" min="1">
+    </div>
+
+    <button class="btn-add" onclick="addItem()">加入計算清單</button>
+
+    <div class="list-title">📋 本次採購明細</div>
+    <div id="cartList">
+        </div>
+
+    <div class="result-box">
+        <span class="result-title">應付買手總額：</span>
+        <span class="result-price">NT$ <span id="totalTWD">0</span> 元</span>
+    </div>
+</div>
+
+<script>
+    let cart = [];
+
+    function addItem() {
+        const select = document.getElementById('productSelect');
+        const qtyInput = document.getElementById('productQty');
+        
+        const productName = select.options[select.selectedIndex].text.split(' (')[0];
+        const productPrice = parseInt(select.value);
+        const qty = parseInt(qtyInput.value) || 1;
+
+        // 新增到清單陣列
+        cart.push({
+            name: productName,
+            price: productPrice,
+            qty: qty
+        });
+
+        // 重設數量為 1
+        qtyInput.value = 1;
+
+        // 更新網頁畫面
+        updateUI();
+    }
+
+    function deleteItem(index) {
+        // 刪除指定項目
+        cart.splice(index, 1);
+        updateUI();
+    }
+
+    function updateUI() {
+        const cartList = document.getElementById('cartList');
+        const totalTWD = document.getElementById('totalTWD');
+        
+        cartList.innerHTML = '';
+        let total = 0;
+
+        if (cart.length === 0) {
+            cartList.innerHTML = '<div style="color:#999; text-align:center; padding:10px; font-size:0.9em;">暫無商品，請從上方選擇加入</div>';
+        }
+
+        cart.forEach((item, index) => {
+            const itemTotal = item.price * item.qty;
+            total += itemTotal;
+
+            const div = document.createElement('div');
+            div.className = 'cart-item';
+            div.innerHTML = `
+                <div>
+                    <strong>${item.name}</strong><br>
+                    <span style="color:#666; font-size:0.9em;">$${item.price} × ${item.qty}</span>
+                </div>
+                <div style="display:flex; align-items:center; gap: 10px;">
+                    <span style="font-weight:bold;">$${itemTotal}</span>
+                    <button class="btn-delete" onclick="deleteItem(${index})">刪除</button>
+                </div>
+            `;
+            cartList.appendChild(div);
+        });
+
+        // 顯示總金額
+        totalTWD.innerText = total.toLocaleString();
+    }
+
+    // 初始化顯示
+    updateUI();
+</script>
+
+</body>
+</html>

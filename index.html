@@ -3,193 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>代購全功能計算機 (手指拖曳排序版)</title>
+    <title>Trader Joe's 買手專用計算機 (Creamy Minimalist)</title>
     <style>
+        :root {
+            --bg-color: #f7f5f0; /* 療癒的韓系燕麥暖白底色 */
+            --card-bg: #ffffff; /* 純白乾淨卡片 */
+            --text-main: #4a4238; /* 溫柔的深摩卡棕文字（比純黑更柔和） */
+            --text-muted: #9c9284; /* 淺駝色低調文字 */
+            --accent-color: #c4a482; /* 氣質奶茶色（主要按鈕與重點色） */
+            --border-color: #ebe6dd; /* 淡淡的奶油線條 */
+            --input-bg: #faf9f6; /* 輸入框微米色 */
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
-            padding: 15px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 16px;
             margin: 0;
             display: flex;
             justify-content: center;
         }
+
         .container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            background-color: var(--card-bg);
+            padding: 28px 20px;
+            border-radius: 24px; /* 韓國 App 很喜歡的大圓角 */
+            box-shadow: 0 10px 30px rgba(74, 66, 56, 0.04); /* 非常輕柔的陰影 */
             width: 100%;
-            max-width: 450px;
+            max-width: 440px;
             box-sizing: border-box;
         }
-        h2, h3 {
+
+        h2 {
             text-align: center;
-            color: #2c3e50;
+            color: var(--text-main);
             margin-top: 0;
+            margin-bottom: 28px;
+            font-size: 1.25em;
+            letter-spacing: 0.5px;
+            font-weight: 600;
         }
-        h2 { font-size: 1.4em; margin-bottom: 20px; }
-        h3 { font-size: 1.1em; color: #e65100; margin-bottom: 15px; text-align: left; border-left: 4px solid #e65100; padding-left: 8px;}
-        
+
+        h3 {
+            font-size: 0.95em;
+            color: var(--text-main);
+            margin-top: 0;
+            margin-bottom: 16px;
+            text-align: left;
+            font-weight: 600;
+            border-left: 3px solid var(--accent-color);
+            padding-left: 8px;
+        }
+
         .admin-box {
-            background-color: #fff3e0;
-            border: 1px solid #ffe0b2;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 25px;
+            background-color: #faf9f6;
+            border: 1px solid var(--border-color);
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 32px;
         }
+
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
+
         label {
             display: block;
             margin-bottom: 6px;
-            font-weight: bold;
-            font-size: 0.9em;
-            color: #495057;
+            font-weight: 600;
+            font-size: 0.85em;
+            color: var(--text-muted);
         }
+
         select, input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 8px;
+            padding: 12px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
             box-sizing: border-box;
             font-size: 0.95em;
+            color: var(--text-main);
+            background-color: #fff;
+            transition: all 0.2s ease;
+            -webkit-appearance: none;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%239c9284' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 14px;
+            padding-right: 36px;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--accent-color);
+            outline: none;
             background-color: #fff;
         }
+
+        input[type="file"] {
+            padding: 8px 10px;
+            font-size: 0.85em;
+            color: var(--text-muted);
+            background: #fff;
+            border: 1px dashed var(--border-color);
+        }
+
         .btn {
             width: 100%;
-            color: white;
             border: none;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 12px;
             font-size: 0.95em;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
-            margin-top: 5px;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
         }
-        .btn-orange { background-color: #f57c00; }
-        .btn-blue { background-color: #228be6; }
+
+        .btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        /* 韓系低飽和度奶茶色與米灰色按鈕 */
+        .btn-orange { background-color: #e8ded1; color: var(--text-main); border: 1px solid #dfd3c3; }
+        .btn-blue { background-color: var(--accent-color); color: #ffffff; box-shadow: 0 4px 12px rgba(196, 164, 130, 0.2); }
+
         .btn-delete {
-            background-color: #ff6b6b;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
+            background-color: #fcfaf7;
+            color: #c97a7a;
+            border: 1px solid #f0e4e4;
+            padding: 5px 10px;
+            border-radius: 8px;
             font-size: 0.8em;
+            font-weight: 500;
             cursor: pointer;
         }
+        .btn-delete:active { background-color: #f5eded; }
+
         .list-title {
-            font-weight: bold;
-            margin-top: 25px;
-            margin-bottom: 10px;
-            color: #495057;
-            font-size: 1em;
-            border-bottom: 2px solid #dee2e6;
-            padding-bottom: 5px;
+            font-weight: 600;
+            margin-top: 32px;
+            margin-bottom: 14px;
+            color: var(--text-main);
+            font-size: 0.95em;
         }
-        
-        /* 拖曳列表樣式 */
+
         .admin-menu-list {
             background-color: #fff;
-            border: 1px solid #ffe0b2;
-            border-radius: 8px;
-            padding: 5px 10px;
-            margin-top: 15px;
-            max-height: 250px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 4px 12px;
+            margin-top: 12px;
+            max-height: 180px;
             overflow-y: auto;
         }
         .admin-menu-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #f1f3f5;
-            font-size: 0.95em;
-            background-color: #fff;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9em;
         }
         .admin-menu-item:last-child { border-bottom: none; }
-        
-        /* 🌟 拖曳中項目的視覺效果 */
-        .admin-menu-item.dragging {
-            opacity: 0.5;
-            background-color: #f1f3f5;
-        }
+        .admin-menu-item.dragging { opacity: 0.4; background-color: #faf9f6; }
         
         .drag-handle {
             cursor: move;
-            color: #aaa;
-            padding-right: 10px;
-            font-size: 1.2em;
+            color: #cdc5b9;
+            padding-right: 12px;
+            font-size: 1.1em;
             user-select: none;
-            touch-action: none; /* 防止手機拖曳時整個網頁跟著滾動 */
+            touch-action: none;
         }
 
+        /* 🛒 購物車卡片 - 乾淨韓系風 */
         .cart-item {
             display: flex;
             align-items: center;
             background-color: #fff;
-            border: 1px solid #f1f3f5;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(74, 66, 56, 0.01);
         }
         .item-photo {
-            width: 70px;
-            height: 70px;
+            width: 68px;
+            height: 68px;
             object-fit: cover;
-            border-radius: 8px;
-            margin-right: 12px;
-            background-color: #e9ecef;
+            border-radius: 10px;
+            margin-right: 14px;
+            background-color: #f7f5f0;
+            border: 1px solid var(--border-color);
         }
         .item-details { flex-grow: 1; }
-        .item-name { font-weight: bold; font-size: 1.05em; margin-bottom: 4px; }
-        .item-price-qty { color: #666; font-size: 0.9em; margin-bottom: 2px; }
-        .item-date { color: #888; font-size: 0.8em; font-style: italic; }
+        .item-name { font-weight: 600; font-size: 0.95em; color: var(--text-main); margin-bottom: 4px; }
+        .item-price-qty { color: var(--text-muted); font-size: 0.88em; margin-bottom: 4px; }
+        .item-date { color: #b5ada1; font-size: 0.75em; }
         
+        /* 📊 總計區塊 - 溫柔的淡奶茶底色 */
         .result-box {
-            background-color: #e8f5e9;
-            border: 1px solid #c8e6c9;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 25px;
+            background-color: #f5eedf;
+            border: 1px solid #ebdcc5;
+            padding: 18px;
+            border-radius: 16px;
+            margin-top: 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .result-title { font-weight: bold; color: #2e7d32; font-size: 1.1em; }
-        .result-price { font-weight: bold; color: #1b5e20; font-size: 1.4em; }
+        .result-title { font-weight: 600; color: var(--text-main); font-size: 0.95em; }
+        .result-price { font-weight: 700; color: #8f6d45; font-size: 1.4em; }
     </style>
 </head>
 <body>
 
 <div class="container">
     
+    <!-- 🛠️ 區塊一：管理區 -->
     <div class="admin-box">
-        <h3>➕ 上架新商品</h3>
+        <h3>✨ 商品上架管理</h3>
         <div class="form-group">
             <label>商品名稱</label>
-            <input type="text" id="newProdName" placeholder="例如：經典護手霜">
+            <input type="text" id="newProdName" placeholder="例如：保濕凝膠">
         </div>
         <div class="form-group">
-            <label>固定台幣成本 (元)</label>
-            <input type="number" id="newProdPrice" placeholder="例如：160">
+            <label>固定成本 (台幣 NT$)</label>
+            <input type="number" id="newProdPrice" placeholder="例如：330">
         </div>
         <div class="form-group">
-            <label>商品照片 (點擊拍照或選相簿)</label>
-            <input type="file" id="newProdImage" accept="image/*" style="padding:5px;">
+            <label>商品照片</label>
+            <input type="file" id="newProdImage" accept="image/*">
         </div>
-        <button class="btn btn-orange" onclick="addNewProductToMenu()">將此商品上架到選單</button>
+        <button class="btn btn-orange" onclick="addNewProductToMenu()">上架至選擇清單</button>
 
-        <label style="margin-top: 15px; display:block; color:#e65100; font-weight:bold;">↕️ 拖曳 ☰ 調整順序 / ❌ 下架商品：</label>
+        <label style="margin-top: 16px; display:block; color:var(--text-muted); font-size: 0.8em; font-weight:600;">↕️ 拖曳 ☰ 排序 / ❌ 下架商品：</label>
         <div class="admin-menu-list" id="adminMenuList"></div>
     </div>
 
-    <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
-
-    <h2>🛒 成本計算機</h2>
+    <h2 style="border-top: 1px solid var(--border-color); padding-top: 28px; letter-spacing: 1px;">🛒 買手採購計算</h2>
     
+    <!-- 區塊二：計算區 -->
     <div class="form-group">
         <label for="productSelect">選擇已上架商品</label>
         <select id="productSelect"></select>
@@ -205,14 +264,14 @@
         <input type="number" id="productQty" value="1" min="1">
     </div>
 
-    <button class="btn btn-blue" onclick="addItemToCart()">加入計算清單</button>
+    <button class="btn btn-blue" onclick="addItemToCart()">加入採購明細</button>
 
     <div class="list-title">📋 本次採購明細</div>
     <div id="cartList"></div>
 
     <div class="result-box">
-        <span class="result-title">應付買手總額：</span>
-        <span class="result-price">NT$ <span id="totalTWD">0</span> 元</span>
+        <span class="result-title">應付買手總額</span>
+        <span class="result-price">NT$ <span id="totalTWD">0</span></span>
     </div>
 </div>
 
@@ -233,7 +292,6 @@
         document.getElementById('purchaseDate').value = `${yyyy}-${mm}-${dd}`;
     }
 
-    // 渲染下拉選單與管理列表
     function updateSelectMenu() {
         const select = document.getElementById('productSelect');
         const adminMenuList = document.getElementById('adminMenuList');
@@ -242,50 +300,44 @@
         adminMenuList.innerHTML = '';
 
         if (products.length === 0) {
-            adminMenuList.innerHTML = '<div style="color:#999; font-size:0.85em; text-align:center; padding:10px;">暫無商品</div>';
+            adminMenuList.innerHTML = '<div style="color:var(--text-muted); font-size:0.85em; text-align:center; padding:12px;">暫無商品</div>';
             return;
         }
 
         products.forEach((prod, index) => {
-            // 1. 更新下拉選單
             const option = document.createElement('option');
             option.value = index;
             option.innerText = `${prod.name} (NT$ ${prod.price})`;
             select.appendChild(option);
 
-            // 2. 更新管理列表 (帶有拖曳手把 ☰)
             const div = document.createElement('div');
             div.className = 'admin-menu-item';
-            div.setAttribute('draggable', 'true'); // 啟用網頁原生拖曳
+            div.setAttribute('draggable', 'true');
             div.setAttribute('data-index', index);
             div.innerHTML = `
                 <div style="display:flex; align-items:center;">
                     <span class="drag-handle">☰</span>
-                    <span>${prod.name} ($${prod.price})</span>
+                    <span style="font-weight:500;">${prod.name} <span style="color:var(--accent-color); font-size:0.9em; margin-left:4px;">$${prod.price}</span></span>
                 </div>
                 <button class="btn-delete" onclick="removeProductFromMenu(${index})">下架</button>
             `;
             adminMenuList.appendChild(div);
         });
 
-        // 🌟 初始化手機與電腦的拖曳事件監聽
         initDragAndDrop();
     }
 
-    // 🌟【全新核心邏輯】處理手指與滑鼠的拖曳排序
     function initDragAndDrop() {
         const list = document.getElementById('adminMenuList');
         const items = list.querySelectorAll('.admin-menu-item');
 
         items.forEach(item => {
-            // --- 電腦版滑鼠拖曳 ---
             item.addEventListener('dragstart', () => item.classList.add('dragging'));
             item.addEventListener('dragend', () => {
                 item.classList.remove('dragging');
                 saveNewOrder();
             });
 
-            // --- 手機版手指觸控拖曳 (Touch Events) ---
             const handle = item.querySelector('.drag-handle');
             
             handle.addEventListener('touchstart', (e) => {
@@ -294,7 +346,7 @@
             }, { passive: true });
 
             handle.addEventListener('touchmove', (e) => {
-                e.preventDefault(); // 阻止手機網頁上下畫面跟著滾動
+                e.preventDefault();
                 const touch = e.touches[0];
                 const afterElement = getDragAfterElement(list, touch.clientY);
                 if (afterElement == null) {
@@ -310,7 +362,6 @@
             });
         });
 
-        // 電腦版在區塊內拖曳移動中
         list.addEventListener('dragover', (e) => {
             e.preventDefault();
             const afterElement = getDragAfterElement(list, e.clientY);
@@ -325,7 +376,6 @@
         });
     }
 
-    // 計算目前拖曳到哪一個商品的上方或下方
     function getDragAfterElement(list, y) {
         const draggableElements = [...list.querySelectorAll('.admin-menu-item:not(.dragging)')];
 
@@ -340,7 +390,6 @@
         }, { offset: Number.NEGATIVE_INFINITY }).element;
     }
 
-    // 🌟 重新排列陣列順序並儲存
     function saveNewOrder() {
         const listItems = [...document.getElementById('adminMenuList').querySelectorAll('.admin-menu-item')];
         const newProductsOrder = [];
@@ -351,22 +400,18 @@
         });
 
         products = newProductsOrder;
-        localStorage.setItem('tj_products', JSON.stringify(products)); // 寫入記憶體
-        
-        // 重新刷新下拉選單（這樣編號 index 才會被重新計算正確）
+        localStorage.setItem('tj_products', JSON.stringify(products));
         updateSelectMenu();
     }
 
-    // 下架商品
     function removeProductFromMenu(index) {
-        if (confirm(`確定要把「${products[index].name}」從選單中刪除嗎？`)) {
+        if (confirm(`確定要把「${products[index].name}」下架嗎？`)) {
             products.splice(index, 1);
             localStorage.setItem('tj_products', JSON.stringify(products));
             updateSelectMenu();
         }
     }
 
-    // 上架商品
     function addNewProductToMenu() {
         const nameInput = document.getElementById('newProdName');
         const priceInput = document.getElementById('newProdPrice');
@@ -393,7 +438,6 @@
     }
 
     function saveProduct(name, price, imageSrc) {
-        // 新增商品時，預設先加在選單最上面
         products.unshift({ name: name, price: price, image: imageSrc });
         localStorage.setItem('tj_products', JSON.stringify(products));
         
@@ -401,11 +445,10 @@
         document.getElementById('newProdPrice').value = '';
         document.getElementById('newProdImage').value = '';
 
-        alert('🎉 商品上架成功！已幫您排在最上方，您也可以在下方手動拖曳調整。');
+        alert('🎉 商品上架成功！');
         updateSelectMenu();
     }
 
-    // 加入明細清單
     function addItemToCart() {
         const select = document.getElementById('productSelect');
         const qtyInput = document.getElementById('productQty');
@@ -443,7 +486,7 @@
         let total = 0;
 
         if (cart.length === 0) {
-            cartList.innerHTML = '<div style="color:#999; text-align:center; padding:10px; font-size:0.9em;">暫無商品，請從上方選擇加入</div>';
+            cartList.innerHTML = '<div style="color:var(--text-muted); text-align:center; padding:16px; font-size:0.9em; border: 1px dashed var(--border-color); border-radius:16px;">明細空空如也，請從上方選擇加入</div>';
         }
 
         cart.forEach((item, index) => {
@@ -453,18 +496,18 @@
             const div = document.createElement('div');
             div.className = 'cart-item';
             
-            const imgSrc = item.image ? item.image : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70"><rect width="70" height="70" fill="%23e9ecef"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="12" fill="%23adb5bd">無照片</text></svg>';
+            const imgSrc = item.image ? item.image : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70"><rect width="70" height="70" fill="%23f7f5f0"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="11" fill="%23cdc5b9">No Image</text></svg>';
 
             div.innerHTML = `
                 <img src="${imgSrc}" alt="${item.name}" class="item-photo">
                 <div class="item-details">
                     <div class="item-name">${item.name}</div>
                     <div class="item-price-qty">NT$ ${item.price} × ${item.qty}</div>
-                    <div class="item-date">📅 購買日期: ${item.date}</div>
+                    <div class="item-date">📅 ${item.date}</div>
                 </div>
-                <div style="text-align: right;">
-                    <div style="font-weight:bold; font-size:1.1em; color:#d84315;">$${itemTotal}</div>
-                    <button class="btn-delete" onclick="deleteItem(${index})">刪除</button>
+                <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; height: 64px;">
+                    <div style="font-weight:600; font-size:1.05em; color:var(--text-main);">$${itemTotal}</div>
+                    <button class="btn-delete" onclick="deleteItem(${index})" style="padding: 4px 8px; font-size: 0.75em;">刪除</button>
                 </div>
             `;
             cartList.appendChild(div);

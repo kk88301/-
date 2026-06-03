@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>代購全功能計算機 (前台自助新增版)</title>
+    <title>代購全功能計算機 (含日期功能版)</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -108,7 +108,8 @@
         }
         .item-details { flex-grow: 1; }
         .item-name { font-weight: bold; font-size: 1.05em; margin-bottom: 4px; }
-        .item-price-qty { color: #666; font-size: 0.9em; }
+        .item-price-qty { color: #666; font-size: 0.9em; margin-bottom: 2px; }
+        .item-date { color: #888; font-size: 0.8em; font-style: italic; }
         
         .result-box {
             background-color: #e8f5e9;
@@ -151,8 +152,12 @@
     
     <div class="form-group">
         <label for="productSelect">選擇已上架商品</label>
-        <select id="productSelect">
-            </select>
+        <select id="productSelect"></select>
+    </div>
+
+    <div class="form-group">
+        <label for="purchaseDate">購買日期</label>
+        <input type="date" id="purchaseDate">
     </div>
 
     <div class="form-group">
@@ -172,7 +177,7 @@
 </div>
 
 <script>
-    // 預設的初始商品清單（如果記憶體是空的，會顯示這兩個作為範例）
+    // 預設的初始商品清單
     const defaultProducts = [
         { name: "Trader Joe's 保濕凝膠", price: 330, image: "" },
         { name: "Trader Joe's 經典護手霜", price: 160, image: "" }
@@ -181,19 +186,28 @@
     let products = JSON.parse(localStorage.getItem('tj_products')) || defaultProducts;
     let cart = [];
 
-    // 1. 初始化：把商品清單渲染到下拉選單中
+    // 🌟 自動將日期的欄位預設為「今天」
+    function setTodayDate() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        document.getElementById('purchaseDate').value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    // 初始化商品選單
     function updateSelectMenu() {
         const select = document.getElementById('productSelect');
         select.innerHTML = '';
         products.forEach((prod, index) => {
             const option = document.createElement('option');
-            option.value = index; // 用陣列的編號當 value
+            option.value = index;
             option.innerText = `${prod.name} (NT$ ${prod.price})`;
             select.appendChild(option);
         });
     }
 
-    // 2. 前台新增商品邏輯（包含把圖片轉成可儲存的格式）
+    // 新增商品
     function addNewProductToMenu() {
         const nameInput = document.getElementById('newProdName');
         const priceInput = document.getElementById('newProdPrice');
@@ -208,51 +222,48 @@
         }
 
         const file = imageInput.files[0];
-        
-        // 如果有上傳照片，需要把照片轉成 Base64 文字字串，才能存進手機記憶體
         if (file) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                const base64Image = e.target.result;
-                saveProduct(name, price, base64Image);
+                saveProduct(name, price, e.target.result);
             };
             reader.readAsDataURL(file);
         } else {
-            saveProduct(name, price, ""); // 沒照片就傳空字串
+            saveProduct(name, price, "");
         }
     }
 
     function saveProduct(name, price, imageSrc) {
-        // 新增到商品陣列
         products.push({ name: name, price: price, image: imageSrc });
-        // 儲存到手機瀏覽器記憶體 (LocalStorage)
         localStorage.setItem('tj_products', JSON.stringify(products));
         
-        // 清空輸入框
         document.getElementById('newProdName').value = '';
         document.getElementById('newProdPrice').value = '';
         document.getElementById('newProdImage').value = '';
 
         alert('🎉 商品上架成功！已加入下方選單');
-        updateSelectMenu(); // 更新下拉選單
+        updateSelectMenu();
     }
 
-    // 3. 加入計算購物車
+    // 加入計算購物車 (含日期)
     function addItemToCart() {
         const select = document.getElementById('productSelect');
         const qtyInput = document.getElementById('productQty');
+        const dateInput = document.getElementById('purchaseDate'); // 抓取日期欄位
         
         if (select.value === '') return;
         
         const selectedIndex = select.value;
         const prod = products[selectedIndex];
         const qty = parseInt(qtyInput.value) || 1;
+        const date = dateInput.value; // 獲取選定的日期
 
         cart.push({
             name: prod.name,
             price: prod.price,
             qty: qty,
-            image: prod.image
+            image: prod.image,
+            date: date // 存入購買日期
         });
 
         qtyInput.value = 1;
@@ -264,7 +275,7 @@
         updateUI();
     }
 
-    // 4. 更新下方的計算明細畫面
+    // 更新明細畫面
     function updateUI() {
         const cartList = document.getElementById('cartList');
         const totalTWD = document.getElementById('totalTWD');
@@ -283,14 +294,15 @@
             const div = document.createElement('div');
             div.className = 'cart-item';
             
-            // 如果有照片就顯示，沒照片就顯示灰色預設圖
             const imgSrc = item.image ? item.image : 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 70 70"><rect width="70" height="70" fill="%23e9ecef"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="12" fill="%23adb5bd">無照片</text></svg>';
 
+            // 🌟 在明細中加入日期顯示 (📅 購買日期：XXXX-XX-XX)
             div.innerHTML = `
                 <img src="${imgSrc}" alt="${item.name}" class="item-photo">
                 <div class="item-details">
                     <div class="item-name">${item.name}</div>
-                    <div class="item-price-qty">$${item.price} × ${item.qty}</div>
+                    <div class="item-price-qty">NT$ ${item.price} × ${item.qty}</div>
+                    <div class="item-date">📅 購買日期: ${item.date}</div>
                 </div>
                 <div style="text-align: right;">
                     <div style="font-weight:bold; font-size:1.1em; color:#d84315;">$${itemTotal}</div>
@@ -303,7 +315,8 @@
         totalTWD.innerText = total.toLocaleString();
     }
 
-    // 網頁打開時自動載入選單
+    // 網頁打開時自動載入
+    setTodayDate();
     updateSelectMenu();
     updateUI();
 </script>
